@@ -1,49 +1,14 @@
-import { styled } from "styled-components";
+import { Wrapper, Title, Form, Input, Error, Switcher } from "../components/auth-components";
 import { useState } from "react";
+import SignUp from "../api/auth/signUp";
+import { Link, useNavigate } from "react-router-dom";
+import CustomError from "../util/customError";
+import { OAuth2Button } from "../components/oauth2-btn";
 
-const Wrapper = styled.div`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 420px;
-  padding: 50px 0px;
-`;
-
-const Title = styled.div`
-  font-size: 42px;
-`;
-
-const Form = styled.form`
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-`;
-
-const Input = styled.input`
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: none;
-  width: 100%;
-  font-size: 16px;
-  &[type="submit"] {
-    cursor: pointer;
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-`;
-
-const Error = styled.span`
-  font-weight: 600;
-  color: tomato;
-  margin-top: 10px;
-`;
 
 export default function CreateAccount() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     loginId: "",
@@ -52,30 +17,56 @@ export default function CreateAccount() {
   });
   const [errorMessage, setErrorMessage] = useState("");
 
-  const validation = () => {
-    if (formData.name === "") setErrorMessage("Name is required 😥");
-    else if (formData.loginId.length < 6)
-      setErrorMessage("Email must be at least 6 characters 😥");
-    else if (formData.loginPw.length < 6)
-      setErrorMessage("Password must be at least 6 characters 😥");
-    else if (formData.loginPw !== formData.confirmPw)
-      setErrorMessage("Password does not match 😥");
-    else setErrorMessage("");
+  const validation = (): string | null => {
+    if (formData.name === "") {
+      return "Name is required 😥";
+    } else if (formData.loginId.length < 6) {
+      return "Email must be at least 6 characters 😥";
+    } else if (formData.loginPw.length < 6) {
+      return "Password must be at least 6 characters 😥";
+    } else if (formData.loginPw !== formData.confirmPw) {
+      return "Password does not match 😥";
+    }
+    return null; // 에러가 없을 경우 null 반환
   };
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
-      validation();
-      
-    } catch (error) {
-      console.error(error);
-    } finally {
+      e.preventDefault();
       setIsLoading(true);
+      setErrorMessage('');
+      const error = validation()
+      if (error) {
+        setErrorMessage(error);
+        setIsLoading(false);
+        return;
+      }
+
+      const dto = {
+        loginId: formData.loginId,
+        loginPw: formData.loginPw,
+        username: formData.name
+      }
+
+      const data = await SignUp(dto); // response.data
+
+      console.log("data: ", data);
+      console.log('회원가입 성공');
+      alert('Sign Up Success!');
+      navigate("/login");
+
+    } catch (error) {
+      if (error instanceof CustomError) {
+        setErrorMessage(error.response.data);
+        setIsLoading(false);
+      }
+
+      navigate("/create-account");
     }
   };
 
@@ -117,6 +108,12 @@ export default function CreateAccount() {
         />
       </Form>
       {errorMessage !== "" ? <Error>{errorMessage}</Error> : null}
+      <Switcher>
+        Already have an account? {""}
+        <Link to="/login">Log in &rarr;</Link>
+
+      </Switcher>
+      <OAuth2Button/>
     </Wrapper>
   );
 }

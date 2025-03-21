@@ -9,22 +9,18 @@ import reset from "styled-reset";
 import { useState, useEffect } from "react";
 import LoadingScreen from "./components/loading-screen";
 import { styled } from "styled-components";
+import ProtectedRoute from "./components/protected-route";
+import OAuth2Callback from "./routes/oauth2-callback";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
-    children: [
-      {
-        path: "",
-        element: <Home />,
-      },
-      {
-        path: "profile",
-        element: <Profile />,
-      },
-    ],
+    element: <Home />
   },
+  {
+    path: "/profile",
+    element: <Profile />
+  }, 
   {
     path: "/login",
     element: <Login />,
@@ -33,7 +29,17 @@ const router = createBrowserRouter([
     path: "/create-account",
     element: <CreateAccount />,
   },
+  {
+    path: "/login/oauth2/callback",
+    element: <OAuth2Callback />
+  },
+  {
+    path: "/protectedRoute",
+    element: <ProtectedRoute><Layout /></ProtectedRoute>,
+  },
 ]);
+
+
 
 const GlobalStyles = createGlobalStyle`
   ${reset};
