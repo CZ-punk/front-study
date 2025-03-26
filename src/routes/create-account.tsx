@@ -1,21 +1,26 @@
-import { Wrapper, Title, Form, Input, Error, Switcher } from "../components/auth-components";
+import { Wrapper, Title, Form, Input, Error, Switcher } from "../style/login-routes.style";
 import { useState } from "react";
 import SignUp from "../api/auth/signUp";
 import { Link, useNavigate } from "react-router-dom";
 import CustomError from "../util/customError";
-import { OAuth2Button } from "../components/oauth2-btn";
+import { OAuth2Button } from "../components/auth-btn";
+import {OAuth2Login} from "../api/auth/oauth2Login";
+import ouath2PopupHandler  from "./oauth2-popup-handler";
+import { useApi } from "../api/useApi";
 
 
-export default function CreateAccount() {
+const CreateAccount: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [popup, setPopup] = useState<WindowProxy | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     loginId: "",
     loginPw: "",
     confirmPw: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const api = useApi();
 
   const validation = (): string | null => {
     if (formData.name === "") {
@@ -27,12 +32,19 @@ export default function CreateAccount() {
     } else if (formData.loginPw !== formData.confirmPw) {
       return "Password does not match 😥";
     }
-    return null; // 에러가 없을 경우 null 반환
+    return null;
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+  
+  ouath2PopupHandler(popup);
+
+  const oAuth2Popup = (provider: string) => {
+    const popup = window.open(OAuth2Login(provider), "Login", "width=400,height=500");
+    setPopup(popup);
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,7 +65,7 @@ export default function CreateAccount() {
         username: formData.name
       }
 
-      const data = await SignUp(dto); // response.data
+      const data = await SignUp(dto, api);
 
       console.log("data: ", data);
       console.log('회원가입 성공');
@@ -113,7 +125,9 @@ export default function CreateAccount() {
         <Link to="/login">Log in &rarr;</Link>
 
       </Switcher>
-      <OAuth2Button/>
+      <OAuth2Button ouath2Login={oAuth2Popup} />
     </Wrapper>
   );
 }
+
+export default CreateAccount;

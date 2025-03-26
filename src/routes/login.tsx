@@ -1,96 +1,33 @@
 import React, { useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Wrapper, Title, Form, Input, Error, Switcher } from "../components/auth-components";
+import { Wrapper, Title, Form, Input, Error, Switcher } from "../style/login-routes.style";
 import { useState } from "react";
 import CustomError from "../util/customError";
 import SignIn from "../api/auth/signIn";
-import { OAuth2Button } from "../components/oauth2-btn";
+import { OAuth2Button } from "../components/auth-btn";
+import useUserStore, { UserInfo } from '../store/useUserStore';
+import OAuth2PopupHandler from "./oauth2-popup-handler";
 import { OAuth2Login } from "../api/auth/oauth2Login";
+import { useApi } from "../api/useApi";
 
 const Login: React.FC = () => {
-    const { isLogin, user, logout, login } = useAuth();
-    const [ popup, setPopup ] = useState<WindowProxy | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         loginId: "",
         loginPw: "",
     });
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [popup, setPopup] = useState<WindowProxy | null>(null);
+    const { setUserInfo } = useUserStore();
+    const api = useApi();
 
     const oAuth2Popup = (provider: string) => {
-        const popup = window.open(OAuth2Login(provider), "Login", "width=500,height=500");
+        const popup = window.open(OAuth2Login(provider), "Login", "width=400,height=500");
         setPopup(popup);
-    }
-    
-    useEffect(() => {
-        if (!popup) {
-            return;
-        }
+    };
 
-        window.addEventListener(
-            "message",
-            (event) => {
-                if (event.origin !== window.location.origin) return;
-
-                if (event.data.type === "SUCCESS") {
-                    console.log('Success');
-                    console.log('isLogin: ', isLogin);
-                    console.log('user: ', user);
-    
-                    popup.close();
-                    setPopup(null)
-                    navigate(event.data.payload);
-                } else if (event.data.type === "FAILURE") {
-                    console.log('Failure');
-                    console.log('isLogin: ', isLogin);
-                    console.log('user: ', user);
-    
-                    popup.close();
-                    setPopup(null)
-                    alert(event.data.payload);
-                }
-
-                // 일단됐다 ㅅㅂ 내일 ㄱㄱ
-    
-            }
-        )
-
-        // const handleMessage = (event: MessageEvent) => {
-        //     console.log('please call!');
-
-        //     if (event.origin !== window.location.origin) return;
-
-           
-
-        //     if (event.data.type === "SUCCESS") {
-        //         console.log('Success');
-        //         console.log('isLogin: ', isLogin);
-        //         console.log('user: ', user);
-
-        //         popup.close();
-        //         setPopup(null)
-        //         navigate(event.data.payload);
-        //     } else if (event.data.type === "FAILURE") {
-        //         console.log('Failure');
-        //         console.log('isLogin: ', isLogin);
-        //         console.log('user: ', user);
-
-        //         popup.close();
-        //         setPopup(null)
-        //         alert(event.data.payload);
-        //     }
-
-        //     window.addEventListener("message", handleMessage, false);
-            
-        //     return () => {
-        //         window.removeEventListener("message", handleMessage);
-        //         popup?.close();
-        //         setPopup(null);
-        //     };
-        // }
-    }, [popup, isLogin]);
+    OAuth2PopupHandler(popup);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -106,9 +43,9 @@ const Login: React.FC = () => {
         return null;
     };
 
-    const handleLogin = (id: number, name: string, accessToken: string, refreshToken: string) => {
-        const userInfo = { id: id, name: name, accessToken: accessToken, refreshToken: refreshToken };
-        login(userInfo);
+    const handleLogin = (id: string, name: string, accessToken: string, refreshToken: string) => {
+        const userInfo: UserInfo = { id: id, name: name, accessToken: accessToken, refreshToken: refreshToken };
+        setUserInfo(userInfo);
         navigate("/");
     }
 
@@ -127,10 +64,9 @@ const Login: React.FC = () => {
                 loginId: formData.loginId,
                 loginPw: formData.loginPw
             }
-
-            const data = await SignIn(dto);
+            const data = await SignIn(dto, api);
             handleLogin(
-                data.data.memberId,
+                data.data.memberId.toString(),
                 data.data.username,
                 data.data.accessToken,
                 data.data.refreshToken
@@ -175,10 +111,9 @@ const Login: React.FC = () => {
                 Don't have an account?{" "}
                 <Link to="/create-account">Create one &rarr;</Link>
             </Switcher>
-            <OAuth2Button />
-            <button onClick={() => oAuth2Popup('google')}>
-                <img src="/image/google_logo.png" alt="google_logo" />
-            </button>
+
+            <OAuth2Button ouath2Login={oAuth2Popup} />
+
         </Wrapper>
     );
 };

@@ -1,17 +1,12 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import useUserStore from "../store/useUserStore";
 
 const Profile = () => {
-    const { isLogin, user } = useAuth();
+    const { userInfo } = useUserStore();
 
-    console.log('isLogin', isLogin);
-    console.log('user:', user);
-    if (!isLogin) return <Navigate to="/login" />;
     return (
         <div>
-            <p>login state: {isLogin}</p>
-            <p>id: {user.id}</p>        
-            <p>username: {user.name}</p>        
+            <p>id: {userInfo?.id}</p>        
+            <p>username: {userInfo?.name}</p>        
         </div>
     )
 }

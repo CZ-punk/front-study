@@ -1,60 +1,59 @@
-import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { useAuth } from '../context/AuthContext';
-
+import useUserStore, { UserInfo } from '../store/useUserStore';
+import { useNavigate } from 'react-router-dom';
 
 const OAuth2Callback = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { isLogin, login } = useAuth();
+    const { setUserInfo } = useUserStore();
+    const [isFirstRender, setIsFirstRender] = useState(true);
+    const [isLogin, setIsLogin] = useState(false);
 
     useEffect(() => {
-        
         const handleCallback = async () => {
-            
             try {
-                console.log('씨부랄')
+                const id = decodeURIComponent(Cookies.get('id') as string);
+                const name = decodeURIComponent(Cookies.get('name') as string);
                 const accessToken = Cookies.get('accessToken');
                 const refreshToken = Cookies.get('refreshToken');
-                const memberId = decodeURIComponent(Cookies.get('memberId')); 
-                const username = decodeURIComponent(Cookies.get('username'));
 
-                if (accessToken && refreshToken && memberId && username) {
-                    const userInfo = {
-                        id: Cookies.get('memberId'),
-                        name: Cookies.get('username'),
-                        accessToken: Cookies.get('accessToken'),
-                        refreshToken: Cookies.get('refreshToken')
+                if (accessToken && refreshToken && id && name) {
+                    const userInfo: UserInfo = {
+                        id: Cookies.get('id') as string,
+                        name: Cookies.get('name') as string,
+                        accessToken: Cookies.get('accessToken') as string,
+                        refreshToken: Cookies.get('refreshToken') as string
                     }
-                    login(userInfo);
 
+                    setUserInfo(userInfo);
+                    setIsLogin(true);
                 } else {
                     console.error('Missing login info in cookies');
+                    setIsLogin(false);
                 }
             } catch (err) {
                 console.error('Login Failed: ', err);
-            } finally {
-                if (window.opener) {
-                    if (isLogin) {
-                        window.opener.postMessage({
-                            type: "SUCCESS",
-                            payload: "/"
-                        }, window.location.origin)
-                        
-                    } else {
-                        window.opener.postMessage({
-                            type: "FAILURE",
-                            payload: "FAILURE"
-                        }, window.location.origin)
-                    }
-                }
+                setIsLogin(false);
             }
         };
-
         handleCallback();
-
     }, []);
+
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false);
+            return;
+        }
+
+        if (window.opener) {
+            const message = {
+                type: isLogin ? "SUCCESS" : "FAILURE",
+                payload: isLogin ? "/" : "FAILURE"
+            };
+
+            window.opener.postMessage(message, window.location.origin);
+        }
+        window.close();
+    }, [isLogin, isFirstRender]);
 
     return null;
 };

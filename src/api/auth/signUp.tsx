@@ -1,5 +1,4 @@
-import { axiosInstance } from "../../util/axios";
-import CustomError from "../../util/customError";
+import { AxiosInstance } from "axios";
 
 interface SignUpDto {
     loginId: string;
@@ -16,9 +15,10 @@ interface ResSignUpDto {
     }
 }
 
-const SignUp = async (dto: SignUpDto): Promise<ResSignUpDto> => {
+
+const SignUp = async (dto: SignUpDto, api: AxiosInstance): Promise<ResSignUpDto> => {
     try {
-        const response = await axiosInstance.post("/api/v1/auth/sign-up", dto);
+        const response = await api.post("/api/v1/auth/sign-up", dto);
         console.log('data: ', response.data);
         return response.data;
 

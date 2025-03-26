@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./components/layout";
 import Home from "./routes/home";
 import Profile from "./routes/profile";
 import Login from "./routes/login";
@@ -11,16 +10,18 @@ import LoadingScreen from "./components/loading-screen";
 import { styled } from "styled-components";
 import ProtectedRoute from "./components/protected-route";
 import OAuth2Callback from "./routes/oauth2-callback";
+import useUserStore, { loadUserInfo } from './store/useUserStore';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />
+    element: <Home />,
+
   },
   {
     path: "/profile",
     element: <Profile />
-  }, 
+  },
   {
     path: "/login",
     element: <Login />,
@@ -34,12 +35,16 @@ const router = createBrowserRouter([
     element: <OAuth2Callback />
   },
   {
-    path: "/protectedRoute",
-    element: <ProtectedRoute><Layout /></ProtectedRoute>,
+    path: "/protect",
+    element: <ProtectedRoute><Home /></ProtectedRoute>,
+    children: [
+      {
+        path: "/protect/profile",
+        element: <Profile />
+      }
+    ]
   },
 ]);
-
-
 
 const GlobalStyles = createGlobalStyle`
   ${reset};
@@ -62,15 +67,16 @@ const Wrapper = styled.div`
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const init = async () => {
-    // wait for firebase
-    // backend logic
-    setIsLoading(false);
-  };
+  const loadUserInfo = useUserStore((state) => state.loadUserInfo);
 
   useEffect(() => {
+    const init = async () => {
+      await loadUserInfo();
+      setIsLoading(false);
+    };
+
     init();
-  }, []);
+  }, [loadUserInfo]);
 
   return (
     <Wrapper>
