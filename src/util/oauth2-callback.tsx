@@ -1,27 +1,39 @@
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import useUserStore, { UserInfo } from '../store/useUserStore';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const OAuth2Callback = () => {
     const { setUserInfo } = useUserStore();
     const [isFirstRender, setIsFirstRender] = useState(true);
     const [isLogin, setIsLogin] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const location = useLocation();
 
     useEffect(() => {
         const handleCallback = async () => {
             try {
+                const queryParams = new URLSearchParams(location.search);
+                const error = queryParams.get('error');
+                if (error) {
+                    const decodedError = decodeURIComponent(error.replace(/\+/g, ' ')); 
+                    setErrorMessage(decodedError);
+                    throw new Error(decodedError);
+                }
+                
                 const id = decodeURIComponent(Cookies.get('id') as string);
                 const name = decodeURIComponent(Cookies.get('name') as string);
+                const profileImageUrl = decodeURIComponent(Cookies.get('profileImageUrl') as string);
                 const accessToken = Cookies.get('accessToken');
                 const refreshToken = Cookies.get('refreshToken');
 
                 if (accessToken && refreshToken && id && name) {
                     const userInfo: UserInfo = {
-                        id: Cookies.get('id') as string,
-                        name: Cookies.get('name') as string,
-                        accessToken: Cookies.get('accessToken') as string,
-                        refreshToken: Cookies.get('refreshToken') as string
+                        id: id,
+                        name: name,
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+                        profileImageUrl: profileImageUrl,
                     }
 
                     setUserInfo(userInfo);
@@ -47,7 +59,7 @@ const OAuth2Callback = () => {
         if (window.opener) {
             const message = {
                 type: isLogin ? "SUCCESS" : "FAILURE",
-                payload: isLogin ? "/" : "FAILURE"
+                payload: isLogin ? "/" : errorMessage,
             };
 
             window.opener.postMessage(message, window.location.origin);

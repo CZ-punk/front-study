@@ -6,6 +6,7 @@ export interface UserInfo {
     name: string;
     accessToken: string;
     refreshToken: string;
+    profileImageUrl: string;
 }
 
 interface UserStore {
@@ -13,6 +14,7 @@ interface UserStore {
     isLogin: boolean;
 
     setUserInfo: (userInfo: UserInfo) => void;
+    updateUsername: (name: string) => void;
     clearUserInfo: () => void;
     loadUserInfo: () => void;
 }
@@ -22,25 +24,47 @@ const useUserStore = create<UserStore>((set) => ({
     isLogin: false,
 
     setUserInfo: (userInfo) => {
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        localStorage.setItem('id', userInfo.id);
+        localStorage.setItem('name', userInfo.name);
+        localStorage.setItem('accessToken', userInfo.accessToken);
+        localStorage.setItem('refreshToken', userInfo.refreshToken);
+        localStorage.setItem('profileImageUrl', userInfo.profileImageUrl);
+        
         set({ userInfo, isLogin: true });
     },
+    updateUsername: (username) => {
+        set((state) => {
+            if (state.userInfo) {
+                const updatedUserInfo = {
+                    ...state.userInfo,
+                    name: username,
+                };
+                localStorage.setItem('name', username);
+                return { userInfo: updatedUserInfo };
+            }
+            return state;
+        })
+    },
     clearUserInfo: () => {
-        localStorage.removeItem('userInfo');
+        localStorage.clear();
         Object.keys(Cookies.get()).forEach((cookieName) => Cookies.remove(cookieName));
-
         set({ userInfo: null, isLogin: false });
     },
     loadUserInfo: async () => {
         try {
-            const storedUserInfo = localStorage.getItem('userInfo');
-            if (storedUserInfo) {
-                set({ userInfo: JSON.parse(storedUserInfo), isLogin: true });
+            const id = localStorage.getItem('id');
+            const name = localStorage.getItem('name');
+            const accessToken = localStorage.getItem('accessToken');
+            const refreshToken = localStorage.getItem('refreshToken');
+            const profileImageUrl = localStorage.getItem('profileImageUrl');
+
+            if (id && name && accessToken && refreshToken && profileImageUrl) {
+                set({ userInfo: { id, name, accessToken, refreshToken, profileImageUrl }, isLogin: true });
             }
         } catch (error) {
             console.error('Error loading user info:', error);
         }
-    }
+    },
 }))
 
 export const useUserInfo = () => {
@@ -48,11 +72,6 @@ export const useUserInfo = () => {
     const isLogin = useUserStore((state) => state.isLogin);
     return { userInfo, isLogin };
 };
-
-export const loadUserInfo = () => {
-    const loadUserInfo = useUserStore((state) => state.loadUserInfo());
-    return {loadUserInfo};
-}
 
 
 export default useUserStore;

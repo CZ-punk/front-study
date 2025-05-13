@@ -2,7 +2,7 @@ import { styled } from "styled-components"
 
 export const Wrapper = styled.div`
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 2fr 1fr;
 
     gap: 20px;
     padding: 20px;
@@ -22,11 +22,12 @@ export const Author = styled.span`
     text-align: center;
 `;
 
-export const Contents = styled.p`
+export const Title = styled.p`
     margin: 10px 0px;
     font-size: 1.2rem;
-     max-width: 100%;
+    max-width: 100%;
     max-height: 80%;
+    text-align: center;
     overflow: auto; 
     white-space: pre-line;
     word-break: break-word;
@@ -71,3 +72,19 @@ export const Button = styled.button`
         background-color: rgba(255, 255, 255, 0.5);
     }
 `;
+
+export const DetailsButton = styled.button`
+    width: 5rem;
+    height: 2.5rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+`

@@ -14,6 +14,7 @@ interface ResSignInDto {
         username: string;
         accessToken: string;
         refreshToken: string;
+        profileImageUrl: string;
     }
 }
 

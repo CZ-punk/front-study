@@ -1,4 +1,4 @@
-import { Wrapper, ButtonWrapper, Button, Logo } from "../style/auth-btn-components.style";
+import { Wrapper, ButtonWrapper, Button, Logo } from "../../style/auth-btn-components.style";
 
 interface OAuth2ButtonProps {
     ouath2Login: (provider: string) => void;

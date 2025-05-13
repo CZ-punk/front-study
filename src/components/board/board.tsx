@@ -1,18 +1,15 @@
 import { useState } from "react";
-import { IBoard } from "./timeline";
-import { 
-    Wrapper, 
-    Author, 
-    ImagePage, 
-    Contents, 
-    ButtonContainer, 
-    Button, 
-    Image 
-} from "../style/board.style"
-
-
-
-
+import { IBoard } from "../../routes/timeline";
+import {
+    Wrapper,
+    Author,
+    ImagePage,
+    Title,
+    ButtonContainer,
+    Button,
+    Image,
+    DetailsButton
+} from "../../style/board-components.style"
 
 const Board = ({ memberId, boardId, title, contents, author, imageUrlList, createdAt }: IBoard) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,9 +26,13 @@ const Board = ({ memberId, boardId, title, contents, author, imageUrlList, creat
     };
     return (
         <Wrapper>
+            <input type="hidden" name="memberId" value={memberId} />
+            <input type="hidden" name="memberId" value={contents} />
+            <input type="hidden" name="memberId" value={createdAt} />
+
 
             <Author>{author}</Author>
-            <Contents>{contents}</Contents>
+            <Title title={title}>{title.length > 12 ? `${title.slice(0, 12)}...` : title}</Title>
 
             {imageUrlList && imageUrlList.length > 0 && (
                 <ImagePage>
@@ -47,11 +48,10 @@ const Board = ({ memberId, boardId, title, contents, author, imageUrlList, creat
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
                             </svg>
                         </Button>
-
                     </ButtonContainer>
-
                 </ImagePage>
             )}
+            <DetailsButton onClick={() => alert(`Details for board ID: ${boardId}`)}>Details</DetailsButton>
 
         </Wrapper>
     )

@@ -3,9 +3,9 @@ import { useState } from "react";
 import SignUp from "../api/auth/signUp";
 import { Link, useNavigate } from "react-router-dom";
 import CustomError from "../util/customError";
-import { OAuth2Button } from "../components/auth-btn";
+import { OAuth2Button } from "../components/auth/auth-btn";
 import {OAuth2Login} from "../api/auth/oauth2Login";
-import ouath2PopupHandler  from "./oauth2-popup-handler";
+import ouath2PopupHandler  from "../util/oauth2-popup-handler";
 import { useApi } from "../api/useApi";
 
 
@@ -40,7 +40,7 @@ const CreateAccount: React.FC = () => {
     setFormData({ ...formData, [name]: value });
   };
   
-  ouath2PopupHandler(popup);
+  ouath2PopupHandler(popup, setErrorMessage);
 
   const oAuth2Popup = (provider: string) => {
     const popup = window.open(OAuth2Login(provider), "Login", "width=400,height=500");

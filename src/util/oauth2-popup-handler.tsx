@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const OAuth2PopupHandler = (popup: WindowProxy | null) => {
+const OAuth2PopupHandler = (popup: WindowProxy | null,  setErrorMessage: React.Dispatch<React.SetStateAction<string>>) => {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,7 +16,7 @@ const OAuth2PopupHandler = (popup: WindowProxy | null) => {
                 navigate(event.data.payload);
                 window.location.reload(); 
             } else if (event.data.type === "FAILURE") {
-                alert(event.data.payload);
+                setErrorMessage(event.data.payload);
             }
         };
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import PostBoard from "../api/board/postBoard";
-import { useApi } from "../api/useApi";
+import PostBoard from "../../api/board/postBoard";
+import { useApi } from "../../api/useApi";
 import {
     Form,
     Text,
@@ -9,7 +9,7 @@ import {
     AttachFileInput,
     SubmitBtn,
     ErrorMessage
-} from "../style/board-form-components.style"
+} from "../../style/board-form-components.style"
 
 const PostBoardForm = () => {
     const api = useApi();

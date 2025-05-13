@@ -27,7 +27,6 @@ export const Button = styled.button`
     &:hover {
         background-color: #555;
     }
-   
 `
 
 export const Logo = styled.img`
@@ -35,5 +34,4 @@ export const Logo = styled.img`
     height: 25px;
     objectFit: contain;
     cursor: pointer;
-    
 `

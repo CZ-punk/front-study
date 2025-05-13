@@ -1,12 +1,12 @@
 import { styled } from "styled-components";
 
-export const Wrapper = styled.div`
+export const HomeWrapper = styled.div`
     display: grid;
     gap: 20px;
     grid-template-columns: 1fr 4fr;
-    grid-template-rows: auto 1fr;
     width: 80%;
-    height: 80%;
+    height: 100vh;
+    const Wrapper = styled.div
     padding: 50px;
 `
 

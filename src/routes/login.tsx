@@ -1,14 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Wrapper, Title, Form, Input, Error, Switcher } from "../style/login-routes.style";
-import { useState } from "react";
-import CustomError from "../util/customError";
-import SignIn from "../api/auth/signIn";
-import { OAuth2Button } from "../components/auth-btn";
-import useUserStore, { UserInfo } from '../store/useUserStore';
-import OAuth2PopupHandler from "./oauth2-popup-handler";
-import { OAuth2Login } from "../api/auth/oauth2Login";
+import { 
+    Wrapper, 
+    Title, 
+    Form, 
+    Input, 
+    Error, 
+    Switcher 
+} from "../style/login-routes.style";
+import { OAuth2Button } from "../components/auth/auth-btn";
+import OAuth2PopupHandler from "../util/oauth2-popup-handler";
+
 import { useApi } from "../api/useApi";
+import SignIn from "../api/auth/signIn";
+import { OAuth2Login } from "../api/auth/oauth2Login";
+import useUserStore, { UserInfo } from '../store/useUserStore';
+import { AxiosError } from "axios";
 
 const Login: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -22,12 +29,12 @@ const Login: React.FC = () => {
     const { setUserInfo } = useUserStore();
     const api = useApi();
 
+    OAuth2PopupHandler(popup, setErrorMessage);
+
     const oAuth2Popup = (provider: string) => {
         const popup = window.open(OAuth2Login(provider), "Login", "width=400,height=500");
         setPopup(popup);
     };
-
-    OAuth2PopupHandler(popup);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -43,10 +50,13 @@ const Login: React.FC = () => {
         return null;
     };
 
-    const handleLogin = (id: string, name: string, accessToken: string, refreshToken: string) => {
-        const userInfo: UserInfo = { id: id, name: name, accessToken: accessToken, refreshToken: refreshToken };
+    const handleLogin = (id: string, name: string, accessToken: string, refreshToken: string, profileImageUrl: string) => {
+        const userInfo: UserInfo = { id: id, name: name, accessToken: accessToken, refreshToken: refreshToken, profileImageUrl: profileImageUrl };
         setUserInfo(userInfo);
         navigate("/");
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
     }
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -57,6 +67,7 @@ const Login: React.FC = () => {
             const error = validation()
             if (error) {
                 setErrorMessage(error);
+                setIsLoading(false);
                 return;
             }
 
@@ -69,17 +80,20 @@ const Login: React.FC = () => {
                 data.data.memberId.toString(),
                 data.data.username,
                 data.data.accessToken,
-                data.data.refreshToken
+                data.data.refreshToken,
+                data.data.profileImageUrl,
             );
-
             alert('Sign In Success!');
             navigate("/");
 
         } catch (error) {
-            if (error instanceof CustomError) {
-                setErrorMessage(error.response.data);
-                setIsLoading(false);
+            if (error instanceof AxiosError) {
+                if (error.response) {
+                    setErrorMessage(error.response.data.data);
+                }
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 

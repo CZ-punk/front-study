@@ -1,69 +1,65 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import { useState, useEffect } from "react";
 import Home from "./routes/home";
 import Profile from "./routes/profile";
-import Login from "./routes/login";
-import CreateAccount from "./routes/create-account";
-import { createGlobalStyle } from "styled-components";
-import reset from "styled-reset";
-import { useState, useEffect } from "react";
+
+import { GlobalStyles } from "./style/GlobalStyles";
+
 import LoadingScreen from "./components/loading-screen";
-import { styled } from "styled-components";
-import ProtectedRoute from "./components/protected-route";
-import OAuth2Callback from "./routes/oauth2-callback";
-import useUserStore, { loadUserInfo } from './store/useUserStore';
+import TimeLine from "./routes/timeline";
+
+import useUserStore from './store/useUserStore';
+import Layout from "./components/layout";
+import Login from "./routes/login";
+import OAuth2Callback from "./util/oauth2-callback";
+import CreateAccount from "./routes/create-account";
+import EternalReturn from "./routes/eternal-return";
+import EternalReturnMain from "./components/eternal-return/main/eternal-return-main";
+import EternalReturnPlayerDetail from "./components/eternal-return/detail/eternal-return-player-detail";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
-
+    element: <Layout><Home /></Layout>,
   },
   {
-    path: "/profile",
-    element: <Profile />
+    path: "/eternal-return",
+    element: <Layout><EternalReturn /></Layout>,
+    children: [
+      {
+        path: "",
+        element: <EternalReturnMain />
+      },
+      {
+        path: "test",
+        element: <EternalReturnPlayerDetail />
+      },
+    ]
+  },
+  {
+    path: "/timeline",
+    element: <Layout><TimeLine /></Layout>,
   },
   {
     path: "/login",
-    element: <Login />,
+    element: <Layout><Login /></Layout>,
   },
   {
     path: "/create-account",
-    element: <CreateAccount />,
+    element: <Layout><CreateAccount /></Layout>
   },
   {
     path: "/login/oauth2/callback",
-    element: <OAuth2Callback />
+    element: <Layout><OAuth2Callback /></Layout>
   },
   {
-    path: "/protect",
-    element: <ProtectedRoute><Home /></ProtectedRoute>,
-    children: [
-      {
-        path: "/protect/profile",
-        element: <Profile />
-      }
-    ]
+    path: "/profile",
+    element: <Layout><Profile /></Layout>
   },
 ]);
-
-const GlobalStyles = createGlobalStyle`
-  ${reset};
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    background-color: black;
-    color: white;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  }
-`;
-
-const Wrapper = styled.div`
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-
-`;
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -79,10 +75,10 @@ function App() {
   }, [loadUserInfo]);
 
   return (
-    <Wrapper>
+    <>
       <GlobalStyles />
       {isLoading ? <LoadingScreen /> : <RouterProvider router={router} />}
-    </Wrapper>
+    </>
   );
 }
 
